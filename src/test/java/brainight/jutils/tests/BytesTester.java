@@ -2,8 +2,10 @@ package brainight.jutils.tests;
 
 import brainight.jutils.Bytes;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -19,7 +21,7 @@ public class BytesTester {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 27, Integer.MAX_VALUE/2, -1, -1000, Integer.MAX_VALUE + 2})
+    @ValueSource(ints = {0, 27, Integer.MAX_VALUE / 2, -1, -1000, Integer.MAX_VALUE + 2})
     void intToBytes(int num) {
         ByteBuffer bb = ByteBuffer.allocate(4);
         bb.putInt(num);

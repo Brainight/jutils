@@ -1,9 +1,12 @@
 package brainight.jutils;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
+ * Github: https://github.com/Brainight
  *
  * @author Brainight
  */
@@ -97,13 +100,14 @@ public class Encoder {
 
         return b64result;
     }
-    
+
     /**
      * Returns padded base64 String.
+     *
      * @param data
-     * @return 
+     * @return
      */
-    public static String encodeB64Str(byte[] data){
+    public static String encodeB64Str(byte[] data) {
         return Encoder.getUTF8(Encoder.encodeB64(data, true));
     }
 
@@ -203,6 +207,33 @@ public class Encoder {
 
     public static String getUTF8(byte[] data) {
         return new String(data, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Uses UTF-8 encoding.
+     *
+     * @param arr
+     * @return
+     */
+    public static byte[] toBytes(char[] arr) {
+        ByteBuffer bb = Encoder.getCharset("UTF-8").encode(CharBuffer.wrap(arr));
+        byte[] b = new byte[bb.remaining()];
+        bb.get(b);
+        return b;
+    }
+
+    /**
+     * Input byte array must be UTF-8 encoded.
+     *
+     * @param arr
+     * @return
+     */
+    public static char[] toChars(byte[] arr) {
+        ByteBuffer bb = ByteBuffer.wrap(arr);
+        CharBuffer cb = Encoder.getCharset("UTF-8").decode(bb);
+        char[] c = new char[cb.remaining()];
+        cb.get(c, cb.position(), cb.remaining());
+        return c;
     }
 
     public static Charset getCharset(String charSet) {

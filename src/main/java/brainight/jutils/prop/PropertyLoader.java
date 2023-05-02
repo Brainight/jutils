@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
+ * Github: https://github.com/Brainight
  *
  * @author Brainight
  */
@@ -32,20 +33,20 @@ public class PropertyLoader {
     public Properties getProperties() {
         return this.properties;
     }
-    
-    public String getProperty(String property){
+
+    public String getProperty(String property) {
         return this.properties.getProperty(property);
     }
-    
-    public int getIntProperty(String property, int defaultValue){
-        try{
+
+    public int getIntProperty(String property, int defaultValue) {
+        try {
             return Math.abs(Integer.parseInt(this.getProperty(property)));
-        }catch(NumberFormatException nfe){
+        } catch (NumberFormatException nfe) {
             return defaultValue;
         }
     }
-    
-    public boolean getBooleanProperty(String property){
+
+    public boolean getBooleanProperty(String property) {
         return this.getProperty(property).equals("true");
     }
 }

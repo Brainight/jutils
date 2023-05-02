@@ -10,17 +10,16 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
+ * Github: https://github.com/Brainight
  *
  * @author Brainight
  */
 public class Bytes {
 
     public static void main(String[] args) {
-        String s = "Hellö World";
-        System.out.println(Arrays.toString(s.getBytes(StandardCharsets.UTF_8)));
-        System.out.println(Arrays.toString(Bytes.toBytes(s.toCharArray())));
-        byte[] b = Bytes.toBytes(s.toCharArray());
-        System.out.println(Bytes.toChars(b));
+        byte[] data = Encoder.getUTF8("P4assw0rd");
+        byte[] hash = Bytes.getSHA256(data);
+        
     }
 
     public static int bytesToIntBE(byte[] bytes) {
@@ -61,33 +60,6 @@ public class Bytes {
                 | (((long) (bytes[5] & 0xFF)) << 16)
                 | (((long) (bytes[6] & 0xFF)) << 8)
                 | (((long) (bytes[7] & 0xFF)) << 0);
-    }
-
-    /**
-     * Uses UTF-8 encoding.
-     *
-     * @param arr
-     * @return
-     */
-    public static byte[] toBytes(char[] arr) {
-        ByteBuffer bb = Encoder.getCharset("UTF-8").encode(CharBuffer.wrap(arr));
-        byte[] b = new byte[bb.remaining()];
-        bb.get(b);
-        return b;
-    }
-
-    /**
-     * Input byte array must be UTF-8 encoded.
-     *
-     * @param arr
-     * @return
-     */
-    public static char[] toChars(byte[] arr) {
-        ByteBuffer bb = ByteBuffer.wrap(arr);
-        CharBuffer cb = Encoder.getCharset("UTF-8").decode(bb);
-        char[] c = new char[cb.remaining()];
-        cb.get(c, cb.position(), cb.remaining());
-        return c;
     }
 
     public static byte[] getSecureRandomBytes(int length) {
