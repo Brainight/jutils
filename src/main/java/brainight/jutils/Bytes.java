@@ -16,12 +16,6 @@ import java.util.Arrays;
  */
 public class Bytes {
 
-    public static void main(String[] args) {
-        byte[] data = Encoder.getUTF8("P4assw0rd");
-        byte[] hash = Bytes.getSHA256(data);
-        
-    }
-
     public static int bytesToIntBE(byte[] bytes) {
         return ((bytes[0] & 0xFF) << 24
                 | (bytes[1] & 0xFF) << 16

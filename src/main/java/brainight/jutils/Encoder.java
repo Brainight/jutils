@@ -219,6 +219,7 @@ public class Encoder {
         ByteBuffer bb = Encoder.getCharset("UTF-8").encode(CharBuffer.wrap(arr));
         byte[] b = new byte[bb.remaining()];
         bb.get(b);
+        Bytes.zeroOut(bb.array());
         return b;
     }
 
@@ -233,6 +234,7 @@ public class Encoder {
         CharBuffer cb = Encoder.getCharset("UTF-8").decode(bb);
         char[] c = new char[cb.remaining()];
         cb.get(c, cb.position(), cb.remaining());
+        Bytes.zeroOut(cb.array());
         return c;
     }
 
