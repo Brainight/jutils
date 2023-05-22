@@ -1,9 +1,6 @@
 package brainight.jutils;
 
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Array;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -89,6 +86,48 @@ public class Bytes {
         return e;
     }
 
+    public static String toString(Object t) {
+        String res = "ERROR";
+        if (t.getClass().isArray()) {
+            Class clazz = t.getClass().getComponentType();
+            int size = 0;
+            
+            if (clazz == byte.class) {
+                size = ((byte[]) t).length;
+            } else if (clazz == short.class) {
+                size = ((short[]) t).length;
+            } else if (clazz == int.class) {
+                size = ((int[]) t).length;
+            } else if (clazz == long.class) {
+                size = ((long[]) t).length;
+            } else if (clazz == float.class) {
+                size = ((float[]) t).length;
+            } else if (clazz == char.class) {
+                size = ((char[]) t).length;
+            } else if (clazz == double.class) {
+                size = ((double[]) t).length;
+            }else{
+                size = ((Object[])t).length;
+            }
+            res = arrayToString(t, size);
+        }
+        return res;
+    }
+
+    private static String arrayToString(Object o, int size) {
+        long x = 0;
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < size; i++) {
+            sb.append(Array.get(o, i));
+            if(i != size - 1){
+                sb.append(", ");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
     public static void zeroOut(byte[] array) {
         Arrays.fill(array, 0, array.length, (byte) 0x00);
     }
@@ -115,6 +154,71 @@ public class Bytes {
 
     public static void zeroOut(float[] array) {
         Arrays.fill(array, 0, array.length, 0x00);
+    }
+
+    public static byte[] getBytes(byte[] src, int... ftj) {
+        byte[] res = new byte[0];
+        int f, t, j;
+        switch (ftj.length) {
+            case 0:
+                res = new byte[src.length];
+                System.arraycopy(src, 0, res, 0, src.length);
+                break;
+            case 1:
+                if (Math.abs(ftj[0]) >= src.length) {
+                    break;
+                }
+                f = ftj[0] < 0 ? src.length + ftj[0] : ftj[0];
+                res = new byte[src.length - f];
+                System.arraycopy(src, f, res, 0, src.length - f);
+                break;
+            case 2:
+                if (Math.abs(ftj[0]) >= src.length || Math.abs(ftj[1]) > src.length) {
+                    break;
+                }
+                f = ftj[0] < 0 ? src.length + ftj[0] : ftj[0];
+                t = ftj[1] < 0 ? src.length + ftj[1] : ftj[1];
+                if (f < t) {
+                    res = new byte[t - f];
+                    System.arraycopy(src, f, res, 0, res.length);
+                } else {
+                    res = new byte[t + src.length - f];
+                    System.arraycopy(src, f, res, 0, src.length - f);
+                    System.arraycopy(src, 0, res, src.length - f, t);
+                }
+                break;
+            default:
+                j = Math.abs(ftj[2]);
+                if (Math.abs(ftj[0]) >= src.length || Math.abs(ftj[1]) > src.length || j > src.length) {
+                    break;
+                }
+                f = ftj[0] < 0 ? src.length + ftj[0] : ftj[0];
+                t = ftj[1] < 0 ? src.length + ftj[1] : ftj[1];
+                int b = 0;
+                if (f < t) {
+                    b = (t - f) / j;
+                    res = new byte[b + 1];
+                    for (int i = f, x = 0; x <= b; i += j, x++) {
+                        res[x] = src[i];
+                    }
+                } else {
+                    int b1 = (f - src.length) / j;
+                    b = t / j + b1;
+                    res = new byte[b];
+                    for (int i = 0, x = 0; x < b; i += j) {
+                        if (i < t || i >= f) {
+                            if (i < t) {
+                                res[b1 + x] = src[i];
+                                x++;
+                            } else {
+                                res[x++] = src[i];
+                            }
+                        }
+                    }
+                }
+                break;
+        }
+        return res;
     }
 
     /**

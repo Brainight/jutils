@@ -14,11 +14,11 @@ import org.junit.jupiter.params.provider.ValueSource;
  *
  * @author Brainight
  */
-public class EncoderTester {
+public class EncoderTest {
 
     @BeforeAll
     static void setup() {
-        System.out.println("Starting " + EncoderTester.class + "tests");
+        System.out.println("Starting " + EncoderTest.class + "tests");
     }
 
     @Test
