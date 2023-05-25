@@ -1,6 +1,7 @@
 package brainight.jutils;
 
 import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -91,7 +92,7 @@ public class Bytes {
         if (t.getClass().isArray()) {
             Class clazz = t.getClass().getComponentType();
             int size = 0;
-            
+
             if (clazz == byte.class) {
                 size = ((byte[]) t).length;
             } else if (clazz == short.class) {
@@ -106,8 +107,8 @@ public class Bytes {
                 size = ((char[]) t).length;
             } else if (clazz == double.class) {
                 size = ((double[]) t).length;
-            }else{
-                size = ((Object[])t).length;
+            } else {
+                size = ((Object[]) t).length;
             }
             res = arrayToString(t, size);
         }
@@ -120,7 +121,7 @@ public class Bytes {
         sb.append("[");
         for (int i = 0; i < size; i++) {
             sb.append(Array.get(o, i));
-            if(i != size - 1){
+            if (i != size - 1) {
                 sb.append(", ");
             }
         }
@@ -266,6 +267,20 @@ public class Bytes {
             ex.printStackTrace();
             return null;
         }
+        byte[] hash = digest.digest(data);
+        return hash;
+    }
+
+    public static byte[] getSHA256(ByteBuffer bb) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        byte[] data = new byte[bb.remaining()];
+        bb.get(data);
         byte[] hash = digest.digest(data);
         return hash;
     }
