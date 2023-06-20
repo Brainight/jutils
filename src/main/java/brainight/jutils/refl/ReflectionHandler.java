@@ -1,12 +1,14 @@
-package com.brainache.utils.refl;
+package brainight.jutils.refl;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -16,22 +18,27 @@ import java.util.Stack;
 public class ReflectionHandler {
 
     private static ReflectionHandler instance;
-
+    private static Map<String, ReflectionHandler> customInstances;
     private boolean useGodMode = false;
 
     public static ReflectionHandler getHandler() {
-        if(instance == null){
+        if (instance == null) {
             instance = new ReflectionHandler();
         }
         return instance;
     }
 
-    public void useGodMode(boolean bool) throws ReflectionException {
-        if (instance == null) {
-            throw new ReflectionException("Current thread has no defined ReflectionHandler");
+    public static ReflectionHandler getHandler(String id) {
+        if(customInstances == null){
+            customInstances = new HashMap<>();
         }
+        
+        ReflectionHandler handler = customInstances.get(id);
+        return handler != null ? handler : new ReflectionHandler();
+    }
 
-        instance.useGodMode = bool;
+    public void useGodMode(boolean bool){
+        this.useGodMode = bool;
     }
 
     /**
@@ -44,7 +51,7 @@ public class ReflectionHandler {
      * @param target
      * @return
      */
-    public <T> T getValueByGetter(Field field, Object target) {
+    public <T> T getValueByGetter(Field field, Object target) throws ReflectionException {
         Method m;
         T res = null;
         try {
@@ -59,8 +66,10 @@ public class ReflectionHandler {
                 }
 
             }
+        } catch (ReflectionException ex1) {
+            throw ex1;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new ReflectionException(ex);
         }
 
         return res;
@@ -76,7 +85,7 @@ public class ReflectionHandler {
      * @param target
      * @return
      */
-    public <T> T getValue(Field field, Object target) {
+    public <T> T getValue(Field field, Object target) throws ReflectionException {
         T res = getValueByGetter(field, target);
         try {
             if (res == null) {
@@ -85,12 +94,19 @@ public class ReflectionHandler {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ReflectionException(e);
         }
 
         return res;
     }
 
+    /**
+     * 
+     * @param field
+     * @param args
+     * @return the method or null if not found.
+     * @throws ReflectionException 
+     */
     public Method getGetterMethodForField(Field field, Class<?>... args) throws ReflectionException {
         Method m;
         try {
@@ -99,24 +115,27 @@ public class ReflectionHandler {
             try {
                 transformArgsToPrimitives(args);
                 m = field.getDeclaringClass().getMethod(getGetterMethodName(field), args);
-            } catch (NoSuchMethodException ex1) {
-                throw new ReflectionException(ex);
-            }
+            } catch (NoSuchMethodException ex1) {}
         }
-        return m;
+        return null;
     }
 
+    /**
+     * 
+     * @param field
+     * @param args
+     * @return the method or null if not found.
+     * @throws ReflectionException 
+     */
     public Method getSetterMethodForField(Field field, Class<?>... args) throws ReflectionException {
-        Method m;
+        Method m = null;
         try {
             m = field.getDeclaringClass().getMethod(getSetterMethodName(field), args);
         } catch (Exception ex) {
             try {
                 transformArgsToPrimitives(args);
                 m = field.getDeclaringClass().getMethod(getSetterMethodName(field), args);
-            } catch (NoSuchMethodException ex1) {
-                throw new ReflectionException("Caused by:", ex);
-            }
+            } catch (NoSuchMethodException ex1) {}
         }
         return m;
     }
@@ -138,7 +157,7 @@ public class ReflectionHandler {
         return name;
     }
 
-    public <T> boolean setValueBySetter(Field field, T value, Object target) {
+    public <T> boolean setValueBySetter(Field field, T value, Object target) throws ReflectionException {
         boolean success = false;
         // Try with class and superclasses
         for (Class<?> clazz = value.getClass(); clazz != null; clazz = clazz.getSuperclass()) {
@@ -146,6 +165,10 @@ public class ReflectionHandler {
                 success = true;
                 break;
             }
+        }
+
+        if (success) {
+            return success;
         }
 
         // Try with interfaces
@@ -159,7 +182,7 @@ public class ReflectionHandler {
         return success;
     }
 
-    private <T> boolean trySetValueBySetter(Field field, T value, Class<?> tryClazz, Object target) {
+    private <T> boolean trySetValueBySetter(Field field, T value, Class<?> tryClazz, Object target) throws ReflectionException {
         Method m;
         try {
             m = getSetterMethodForField(field, tryClazz);
@@ -174,14 +197,16 @@ public class ReflectionHandler {
                     return true;
                 }
             }
+        } catch (ReflectionException ex1) {
+            throw ex1;
         } catch (Exception ex) {
-            //ex.printStackTrace();
+            throw new ReflectionException(ex);
         }
 
         return false;
     }
 
-    public <T> boolean setValue(Field field, T value, Object target) {
+    public <T> boolean setValue(Field field, T value, Object target) throws ReflectionException {
         boolean success = setValueBySetter(field, value, target);
         try {
             if (!success) {
@@ -193,7 +218,7 @@ public class ReflectionHandler {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new ReflectionException(e);
         }
 
         return success;
@@ -281,6 +306,8 @@ public class ReflectionHandler {
             } else if (impl.equals(Stack.class)) {
                 return new Stack<T>();
             }
+        } catch (ReflectionException ex1) {
+            throw ex1;
         } catch (Exception e) {
             throw new ReflectionException("Caused by:", e);
         }

@@ -1,6 +1,6 @@
 
 
-package com.brainache.utils.refl;
+package brainight.jutils.refl;
 
 /**
  *
@@ -19,6 +19,8 @@ public class ReflectionException extends Exception{
     public ReflectionException(Throwable cause) {
         super(cause);
     }
+    
+    
 
     
 }
