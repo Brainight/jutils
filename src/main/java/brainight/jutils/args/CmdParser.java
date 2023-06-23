@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import brainight.jutils.args.annotations.A;
+import brainight.jutils.args.annotations.wrappers.Argument;
+import brainight.jutils.args.annotations.wrappers.Option;
 import brainight.jutils.args.handlers.ArgHandler;
+import brainight.jutils.args.handlers.CoffeeArgHandler;
 import brainight.jutils.refl.ReflectionException;
 import brainight.jutils.refl.ReflectionHandler;
 
@@ -17,15 +20,25 @@ import brainight.jutils.refl.ReflectionHandler;
  */
 public class CmdParser {
 
-    private final ReflectionHandler REFL = ReflectionHandler.getHandler("CmdParser");
-    
-    Map<Class<?>, CmdArgsDef<?>> cmdArgsDefRegistry;
-    Map<Class<? extends ArgHandler>, ArgHandler> argHandlers;
+    private final ReflectionHandler refl = ReflectionHandler.getHandler("CmdParser");
+
+    protected Map<Class<?>, CmdArgsDef<?>> cmdArgsDefRegistry;
+    protected ArgHandlerRegistry argsHandlerRegistry;
 
     public CmdParser() {
         this.cmdArgsDefRegistry = new HashMap<>();
-        this.argHandlers = new HashMap<>();
-        REFL.useGodMode(true);
+        this.argsHandlerRegistry = new ArgHandlerRegistry();
+        refl.useGodMode(true);
+    }
+
+    public CmdParser(ArgHandlerRegistry registry) {
+        this.cmdArgsDefRegistry = new HashMap<>();
+        this.argsHandlerRegistry = registry;
+        refl.useGodMode(true);
+    }
+
+    public ArgHandlerRegistry getArgsHandlerRegistry() {
+        return argsHandlerRegistry;
     }
 
     public <T> void registerArgsDefinitionForClass(Class<T> clazz) throws ArgsException {
@@ -59,6 +72,7 @@ public class CmdParser {
 
             if (!onlyAs) { // Options
                 O o = this.getOption(arg, def);
+                Option op = def.getOption(o);
                 if (o == null) {
                     if (requiredOs.size() > 0) {
                         throw new ArgsException("Missing required options: " + this.getOptionsAsStringList(requiredOs));
@@ -69,7 +83,7 @@ public class CmdParser {
                     if (o.required()) {
                         requiredOs.remove(o);
                     }
-                    processOption(o, cah, def, bean);
+                    processOption(op, cah, bean);
                     continue;
                 }
             }
@@ -83,8 +97,8 @@ public class CmdParser {
             if (a.required()) {
                 requiredAs.remove(a);
             }
-
-            processArgument(a, cah, def, bean);
+            Argument ar = def.getArgument(a);
+            processArgument(ar, cah, bean);
         }
 
         if (requiredAs.size() > 0) {
@@ -92,35 +106,23 @@ public class CmdParser {
         }
     }
 
-    private <T> void processOption(O o, CmdArgsHolder cah, CmdArgsDef def, T bean) throws ArgsException {
-
-        // Get Handler and asign value
-        Class<? extends ArgHandler> clazz = o.handler();
+    private <T> void processOption(Option o, CmdArgsHolder cah, T bean) throws ArgsException {
         try {
-            ArgHandler ah = this.argHandlers.get(clazz);
-            if (ah == null) {
+            ArgHandler ah = o.getHandler();
+            Object value = ah.parseOption(cah, o.getO());
+            refl.getHandler().setValue(o.getField(), value, bean);
 
-                ah = REFL.getHandler().constructDefault(clazz);
-                Object value = ah.parseOption(cah, o);
-                Field f = def.getOptionField(o);
-                REFL.getHandler().setValue(f, value, bean);
-            }
         } catch (ReflectionException e) {
             throw new ArgsException(e.getMessage(), e);
         }
     }
 
-    private <T> void processArgument(A a, CmdArgsHolder cah, CmdArgsDef def, T bean) throws ArgsException {
-        Class<? extends ArgHandler> clazz = a.handler();
+    private <T> void processArgument(Argument ar, CmdArgsHolder cah, T bean) throws ArgsException {
+        ArgHandler ah = ar.getHandler();
         try {
-            ArgHandler ah = this.argHandlers.get(clazz);
-            if (ah == null) {
+            Object value = ah.parseArgument(cah, ar.getA());
+            refl.getHandler().setValue(ar.getField(), value, bean);
 
-                ah = REFL.getHandler().constructDefault(clazz);
-                Object value = ah.parseArgument(cah, a);
-                Field f = def.getArgumentField(a);
-                REFL.getHandler().setValue(f, value, bean);
-            }
         } catch (ReflectionException e) {
             throw new ArgsException(e.getMessage(), e);
         }
@@ -153,28 +155,32 @@ public class CmdParser {
     }
 
     private <T> CmdArgsDef<T> load(Class<T> clazz) throws ArgsException {
-        Map<O, Field> oMap = new HashMap<>();
-        Map<A, Field> aMap = new HashMap<>();
+        Map<O, Option> oMap = new HashMap<>();
+        Map<A, Argument> aMap = new HashMap<>();
         CmdArgsDef cad = new CmdArgsDef(clazz, oMap, aMap);
         boolean isO = false;
         for (Class c = clazz; c != null; c = c.getSuperclass()) {
             for (Field f : c.getDeclaredFields()) {
                 isO = false;
                 O o = f.getAnnotation(O.class);
-                A p = f.getAnnotation(A.class);
+                A a = f.getAnnotation(A.class);
 
                 if (o != null) {
                     isO = true;
                     this.checkUniq(o, oMap.keySet());
-                    oMap.put(o, f);
+                    ArgHandler ah = resolveHandler(o.handler(), f);
+                    Option op = new Option(o, f, ah);
+                    oMap.put(o, op);
                 }
 
-                if (p != null) {
+                if (a != null) {
                     if (isO) {
                         throw new ArgsException("Field cannot be both option and positional parameter.");
                     }
-                    this.checkUniq(p, aMap.keySet());
-                    aMap.put(p, f);
+                    this.checkUniq(a, aMap.keySet());
+                    ArgHandler ah = resolveHandler(a.handler(), f);
+                    Argument arg = new Argument(a, f, ah);
+                    aMap.put(a, arg);
                 }
             }
         }
@@ -201,6 +207,20 @@ public class CmdParser {
                 throw new ArgsException("Found two positional parameters with same position index.");
             }
         }
+    }
 
+    private ArgHandler resolveHandler(Class<? extends ArgHandler> ahClazz, Field tf) throws ArgsException {
+        Class<?> tClazz = tf.getType();
+        ArgHandler ah = null;
+        if (ahClazz == CoffeeArgHandler.class) {
+            ah = this.argsHandlerRegistry.getArgHandlerForClass(tClazz);
+        } else {
+            ah = this.argsHandlerRegistry.getArgHandlerOfType(ahClazz);
+            if (ah.getTargetClass() != tClazz) {
+                throw new ArgsException("ArgHandler for field " + tf.getName() + " in "
+                        + tf.getDeclaringClass().toString() + " cannot handle field's type values " + tClazz.toString());
+            }
+        }
+        return ah;
     }
 }

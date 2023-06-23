@@ -5,7 +5,7 @@
 package brainight.jutils.args.annotations;
 
 import brainight.jutils.args.handlers.ArgHandler;
-import brainight.jutils.args.handlers.StringArgHandler;
+import brainight.jutils.args.handlers.CoffeeArgHandler;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,7 +46,7 @@ public @interface O {
      *
      * @return
      */
-    public Class<? extends ArgHandler> handler() default StringArgHandler.class;
+    public Class<? extends ArgHandler> handler() default CoffeeArgHandler.class;
 
     /**
      * Defines if the option is required or optional.

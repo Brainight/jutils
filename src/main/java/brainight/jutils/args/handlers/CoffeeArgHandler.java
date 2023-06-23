@@ -8,20 +8,20 @@ import brainight.jutils.args.annotations.A;
 import brainight.jutils.args.annotations.O;
 
 /**
+ * Dummy useless handler
  * Github: https://github.com/Brainight
  * @author Brainight
  */
-public class BooleanArgHandler implements ArgHandler<Boolean>{
+public class CoffeeArgHandler implements ArgHandler{
 
     @Override
-    public Boolean parseArgument(CmdArgsHolder args, A a) throws ArgsException {
-        return Boolean.valueOf(args.getCurrent());
+    public Object parseArgument(CmdArgsHolder args, A a) throws ArgsException {
+        return null;
     }
 
     @Override
-    public Boolean parseOption(CmdArgsHolder args, O o) throws ArgsException {
-        return Boolean.valueOf(args.getNext());
+    public Object parseOption(CmdArgsHolder args, O o) throws ArgsException {
+       return null;
     }
-
 
 }

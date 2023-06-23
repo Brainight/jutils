@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import brainight.jutils.args.annotations.A;
+import brainight.jutils.args.annotations.wrappers.Argument;
+import brainight.jutils.args.annotations.wrappers.Option;
 import java.util.HashSet;
 
 /**
@@ -16,10 +18,10 @@ import java.util.HashSet;
 public class CmdArgsDef<T> {
 
     private final Class<T> beanType;
-    private final Map<O, Field> options;
-    private final Map<A, Field> arguments;
+    private final Map<O, Option> options;
+    private final Map<A, Argument> arguments;
 
-    public CmdArgsDef(Class<T> clazz, Map<O, Field> options, Map<A, Field> arguments) {
+    public CmdArgsDef(Class<T> clazz, Map<O, Option> options, Map<A, Argument> arguments) {
         this.beanType = clazz;
         this.options = options;
         this.arguments = arguments;
@@ -29,12 +31,20 @@ public class CmdArgsDef<T> {
         return beanType;
     }
 
-    public Map<O, Field> getOptions() {
+    public Map<O, Option> getOptions() {
         return options;
     }
 
-    public Map<A, Field> getArguments() {
+    public Map<A, Argument> getArguments() {
         return arguments;
+    }
+
+    public Option getOption(O o) {
+        return this.options.get(o);
+    }
+
+    public Argument getArgument(A a) {
+        return this.arguments.get(a);
     }
 
     public Set<O> getOptionsSet() {
@@ -46,11 +56,11 @@ public class CmdArgsDef<T> {
     }
 
     public Field getOptionField(O o) {
-        return this.options.get(o);
+        return this.options.get(o).getField();
     }
 
     public Field getArgumentField(A p) {
-        return this.arguments.get(p);
+        return this.arguments.get(p).getField();
     }
 
     public Set<O> getRequiredOs() {

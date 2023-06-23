@@ -5,6 +5,7 @@
 package brainight.jutils.args.annotations;
 
 import brainight.jutils.args.handlers.ArgHandler;
+import brainight.jutils.args.handlers.CoffeeArgHandler;
 import brainight.jutils.args.handlers.StringArgHandler;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -27,5 +28,5 @@ public @interface A {
     
     public String multiValueSeparator() default ",";
 
-    public Class<? extends ArgHandler> handler() default StringArgHandler.class;
+    public Class<? extends ArgHandler> handler() default CoffeeArgHandler.class;
 }
