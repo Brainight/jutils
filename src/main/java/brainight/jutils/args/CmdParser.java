@@ -56,6 +56,10 @@ public class CmdParser {
     }
 
     public <T> void parse(T bean, String[] args) throws ArgsException {
+        this.parse(bean, args, 0);
+    }
+
+    public <T> void parse(T bean, String[] args, int ipos) throws ArgsException {
         CmdArgsHolder cah = new CmdArgsHolder(args);
         CmdArgsDef def = this.cmdArgsDefRegistry.get(bean.getClass());
         if (def == null) {

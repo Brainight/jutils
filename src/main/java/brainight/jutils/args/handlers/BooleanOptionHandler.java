@@ -15,7 +15,7 @@ public class BooleanOptionHandler implements ArgHandler<Boolean>{
 
     @Override
     public Boolean parseArgument(CmdArgsHolder args, A a) throws ArgsException {
-        return false; // ... :|
+        return true; // ... :|
     }
 
     @Override
