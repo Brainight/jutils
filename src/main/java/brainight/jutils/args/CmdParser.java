@@ -142,10 +142,20 @@ public class CmdParser {
 
     private String getArgumentsAsStringList(Set<A> s) {
         String str = "";
+        int pos = 0;
         for (A a : s) {
-            str += a.placeHolder() + ", ";
+            pos = a.position();
+            str += "(" + pos + ") " + a.placeHolder() + ", ";
         }
         return str.substring(0, str.length() - 2);
+    }
+
+    private String getArgumentsPositionsAsStringList(Set<A> s) {
+        String str = "[";
+        for (A a : s) {
+            str += a.position() + ", ";
+        }
+        return str.substring(0, str.length() - 2) + "]";
     }
 
     private <T> O getOption(String arg, CmdArgsDef<T> def) {

@@ -11,12 +11,12 @@ public class CmdArgsHolder {
 
     public CmdArgsHolder(String[] args) {
         this.args = args;
-        pos = -1;
+        this.pos = -1;
     }
 
     public CmdArgsHolder(String[] args, int ipos) {
         this.args = args;
-        pos = -1 + ((ipos >= 0) ? ipos : 0);
+        this.pos = ipos;
     }
 
     public String getCurrent() {

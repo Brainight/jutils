@@ -1,5 +1,8 @@
 package brainight.jutils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
@@ -284,4 +287,5 @@ public class Bytes {
         byte[] hash = digest.digest(data);
         return hash;
     }
+
 }
