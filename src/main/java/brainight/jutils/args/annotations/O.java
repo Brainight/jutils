@@ -57,4 +57,6 @@ public @interface O {
 
     public String multiValueSeparator() default ",";
 
+    public String[] deniesOs() default {};
+
 }

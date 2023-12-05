@@ -24,7 +24,7 @@ public @interface A {
     
     public int position();
     
-    public boolean required() default false;
+    public boolean required() default true;
     
     public String multiValueSeparator() default ",";
 

@@ -1,11 +1,19 @@
 package brainight.jutils.args;
 
 import brainight.jutils.args.handlers.ArgHandler;
+import brainight.jutils.args.handlers.BooleanArgHandler;
+import brainight.jutils.args.handlers.BooleanOptionHandler;
+import brainight.jutils.args.handlers.FileArgHandler;
+import brainight.jutils.args.handlers.IntegerArgHandler;
+import brainight.jutils.args.handlers.PathArgHandler;
+import brainight.jutils.args.handlers.StringArgHandler;
 import brainight.jutils.refl.ReflectionException;
 import brainight.jutils.refl.ReflectionHandler;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -26,6 +34,20 @@ public class ArgHandlerRegistry {
     public ArgHandlerRegistry() {
         this.defaultHandlerRegistry = new HashMap<>();
         this.secondaryHandlerRegistry = new LinkedList<>();
+    }
+
+    public static ArgHandlerRegistry loadDefault() {
+        ArgHandlerRegistry ahr = new ArgHandlerRegistry();
+        ahr.addHandler(String.class, new StringArgHandler());
+        ahr.addHandler(boolean.class, new BooleanOptionHandler());
+        ahr.addHandler(Boolean.class, new BooleanOptionHandler());
+        ahr.addHandler(boolean.class, new BooleanArgHandler());
+        ahr.addHandler(Boolean.class, new BooleanArgHandler());
+        ahr.addHandler(int.class, new IntegerArgHandler());
+        ahr.addHandler(Integer.class, new IntegerArgHandler());
+        ahr.addHandler(Path.class, new PathArgHandler());
+        ahr.addHandler(File.class, new FileArgHandler());
+        return ahr;
     }
 
     /**
@@ -57,7 +79,6 @@ public class ArgHandlerRegistry {
             if (!this.secondaryHandlerRegistry.contains(handler)) {
                 this.secondaryHandlerRegistry.add(handler);
             }
-            this.secondaryHandlerRegistry.add(handler);
         } else {
             this.defaultHandlerRegistry.put(clazz, handler);
         }

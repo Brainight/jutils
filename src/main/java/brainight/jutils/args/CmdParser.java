@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import brainight.jutils.args.annotations.A;
+import brainight.jutils.args.annotations.O;
 import brainight.jutils.args.annotations.wrappers.Argument;
 import brainight.jutils.args.annotations.wrappers.Option;
 import brainight.jutils.args.handlers.ArgHandler;
 import brainight.jutils.args.handlers.CoffeeArgHandler;
 import brainight.jutils.refl.ReflectionException;
 import brainight.jutils.refl.ReflectionHandler;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Github: https://github.com/Brainight
@@ -25,9 +28,13 @@ public class CmdParser {
     protected Map<Class<?>, CmdArgsDef<?>> cmdArgsDefRegistry;
     protected ArgHandlerRegistry argsHandlerRegistry;
 
+    /**
+     * Construct an instance of CmdParser with all ootb ArgHandler classes
+     * registered in registry.
+     */
     public CmdParser() {
         this.cmdArgsDefRegistry = new HashMap<>();
-        this.argsHandlerRegistry = new ArgHandlerRegistry();
+        this.argsHandlerRegistry = ArgHandlerRegistry.loadDefault();
         refl.useGodMode(true);
     }
 
@@ -68,6 +75,7 @@ public class CmdParser {
 
         Set<O> requiredOs = def.getRequiredOs();
         Set<A> requiredAs = def.getRequiredAs();
+        List<O> processedOs = new LinkedList<>();
         boolean onlyAs = false;
         int apos = 0;
 
@@ -84,10 +92,13 @@ public class CmdParser {
                     onlyAs = true;
                 } else {
                     // Get handler and asign
+                    this.checkDeniedOps(o, processedOs);
                     if (o.required()) {
                         requiredOs.remove(o);
                     }
+
                     processOption(op, cah, bean);
+                    processedOs.add(o);
                     continue;
                 }
             }
@@ -107,6 +118,16 @@ public class CmdParser {
 
         if (requiredAs.size() > 0) {
             throw new ArgsException("Missing required arguments at positions: " + this.getArgumentsAsStringList(requiredAs));
+        }
+    }
+
+    private void checkDeniedOps(O o, List<O> processedOs) throws ArgsException {
+        for (O op : processedOs) {
+            for (String sname : op.deniesOs()) {
+                if (sname.equals(o.sname())) {
+                    throw new ArgsException("Option '" + o.sname() + "' is denied by previous option '" + sname + "'");
+                }
+            }
         }
     }
 
