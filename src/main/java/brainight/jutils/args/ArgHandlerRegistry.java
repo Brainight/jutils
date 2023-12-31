@@ -5,6 +5,7 @@ import brainight.jutils.args.handlers.BooleanArgHandler;
 import brainight.jutils.args.handlers.BooleanOptionHandler;
 import brainight.jutils.args.handlers.FileArgHandler;
 import brainight.jutils.args.handlers.IntegerArgHandler;
+import brainight.jutils.args.handlers.ListArgHandler;
 import brainight.jutils.args.handlers.PathArgHandler;
 import brainight.jutils.args.handlers.StringArgHandler;
 import brainight.jutils.refl.ReflectionException;
@@ -17,6 +18,7 @@ import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +49,7 @@ public class ArgHandlerRegistry {
         ahr.addHandler(Integer.class, new IntegerArgHandler());
         ahr.addHandler(Path.class, new PathArgHandler());
         ahr.addHandler(File.class, new FileArgHandler());
+        ahr.addHandler(List.class, new ListArgHandler());
         return ahr;
     }
 

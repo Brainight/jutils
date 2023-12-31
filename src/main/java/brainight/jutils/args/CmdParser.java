@@ -1,6 +1,5 @@
 package brainight.jutils.args;
 
-import brainight.jutils.args.annotations.O;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,9 +47,10 @@ public class CmdParser {
         return argsHandlerRegistry;
     }
 
-    public <T> void registerArgsDefinitionForClass(Class<T> clazz) throws ArgsException {
+    public <T> CmdArgsDef<T> registerArgsDefinitionForClass(Class<T> clazz) throws ArgsException {
         CmdArgsDef<T> def = this.load(clazz);
         this.cmdArgsDefRegistry.put(clazz, def);
+        return def;
     }
 
     private <T> CmdArgsDef<T> getArgsDef(Class<T> clazz) throws ArgsException {
@@ -63,7 +63,7 @@ public class CmdParser {
     }
 
     public <T> void parse(T bean, String[] args) throws ArgsException {
-        this.parse(bean, args, 0);
+        this.parse(bean, args, -1);
     }
 
     public <T> void parse(T bean, String[] args, int ipos) throws ArgsException {
@@ -103,7 +103,7 @@ public class CmdParser {
                 }
             }
 
-            A a = this.getArgument(++apos, def);
+            A a = this.getArgument(apos++, def);
             if (a == null) {
                 throw new ArgsException("Unkown argument at position '" + apos + "'.");
             }
@@ -134,7 +134,7 @@ public class CmdParser {
     private <T> void processOption(Option o, CmdArgsHolder cah, T bean) throws ArgsException {
         try {
             ArgHandler ah = o.getHandler();
-            Object value = ah.parseOption(cah, o.getO());
+            Object value = ah.parseOption(cah, o, bean);
             refl.getHandler().setValue(o.getField(), value, bean);
 
         } catch (ReflectionException e) {
@@ -145,7 +145,7 @@ public class CmdParser {
     private <T> void processArgument(Argument ar, CmdArgsHolder cah, T bean) throws ArgsException {
         ArgHandler ah = ar.getHandler();
         try {
-            Object value = ah.parseArgument(cah, ar.getA());
+            Object value = ah.parseArgument(cah, ar, bean);
             refl.getHandler().setValue(ar.getField(), value, bean);
 
         } catch (ReflectionException e) {
@@ -251,11 +251,24 @@ public class CmdParser {
             ah = this.argsHandlerRegistry.getArgHandlerForClass(tClazz);
         } else {
             ah = this.argsHandlerRegistry.getArgHandlerOfType(ahClazz);
-            if (ah.getTargetClass() != tClazz) {
+            if (!checkArgsHandlerCanAssignToField(ah, tf)) {
                 throw new ArgsException("ArgHandler for field " + tf.getName() + " in "
                         + tf.getDeclaringClass().toString() + " cannot handle field's type values " + tClazz.toString());
             }
         }
         return ah;
+    }
+
+    private boolean checkArgsHandlerCanAssignToField(ArgHandler ah, Field tf) throws ArgsException {
+        Class<?> clazz = tf.getType();
+        if (clazz.isPrimitive()) {
+            if (clazz.equals(boolean.class) || ah.getTargetClass().equals(Boolean.class)) {
+                return true;
+            }
+            if (clazz.equals(int.class) || ah.getTargetClass().equals(Integer.class)) {
+                return true;
+            }
+        }
+        return clazz.isAssignableFrom(ah.getTargetClass());
     }
 }

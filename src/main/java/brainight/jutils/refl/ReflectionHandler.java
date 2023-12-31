@@ -29,15 +29,15 @@ public class ReflectionHandler {
     }
 
     public static ReflectionHandler getHandler(String id) {
-        if(customInstances == null){
+        if (customInstances == null) {
             customInstances = new HashMap<>();
         }
-        
+
         ReflectionHandler handler = customInstances.get(id);
         return handler != null ? handler : new ReflectionHandler();
     }
 
-    public void useGodMode(boolean bool){
+    public void useGodMode(boolean bool) {
         this.useGodMode = bool;
     }
 
@@ -101,11 +101,11 @@ public class ReflectionHandler {
     }
 
     /**
-     * 
+     *
      * @param field
      * @param args
      * @return the method or null if not found.
-     * @throws ReflectionException 
+     * @throws ReflectionException
      */
     public Method getGetterMethodForField(Field field, Class<?>... args) throws ReflectionException {
         Method m;
@@ -115,17 +115,18 @@ public class ReflectionHandler {
             try {
                 transformArgsToPrimitives(args);
                 m = field.getDeclaringClass().getMethod(getGetterMethodName(field), args);
-            } catch (NoSuchMethodException ex1) {}
+            } catch (NoSuchMethodException ex1) {
+            }
         }
         return null;
     }
 
     /**
-     * 
+     *
      * @param field
      * @param args
      * @return the method or null if not found.
-     * @throws ReflectionException 
+     * @throws ReflectionException
      */
     public Method getSetterMethodForField(Field field, Class<?>... args) throws ReflectionException {
         Method m = null;
@@ -135,7 +136,8 @@ public class ReflectionHandler {
             try {
                 transformArgsToPrimitives(args);
                 m = field.getDeclaringClass().getMethod(getSetterMethodName(field), args);
-            } catch (NoSuchMethodException ex1) {}
+            } catch (NoSuchMethodException ex1) {
+            }
         }
         return m;
     }
@@ -238,38 +240,22 @@ public class ReflectionHandler {
             return null;
         }
 
-        if (wrapperClazz.isAssignableFrom(Boolean.class
-        )) {
-            primitiveClazz
-                    = boolean.class;
-        } else if (wrapperClazz.isAssignableFrom(Byte.class
-        )) {
-            primitiveClazz
-                    = byte.class;
-        } else if (wrapperClazz.isAssignableFrom(Character.class
-        )) {
-            primitiveClazz
-                    = char.class;
-        } else if (wrapperClazz.isAssignableFrom(Short.class
-        )) {
-            primitiveClazz
-                    = short.class;
-        } else if (wrapperClazz.isAssignableFrom(Integer.class
-        )) {
-            primitiveClazz
-                    = int.class;
-        } else if (wrapperClazz.isAssignableFrom(Long.class
-        )) {
-            primitiveClazz
-                    = long.class;
-        } else if (wrapperClazz.isAssignableFrom(Float.class
-        )) {
-            primitiveClazz
-                    = float.class;
-        } else if (wrapperClazz.isAssignableFrom(Double.class
-        )) {
-            primitiveClazz
-                    = double.class;
+        if (wrapperClazz.isAssignableFrom(Boolean.class)) {
+            primitiveClazz = boolean.class;
+        } else if (wrapperClazz.isAssignableFrom(Byte.class)) {
+            primitiveClazz = byte.class;
+        } else if (wrapperClazz.isAssignableFrom(Character.class)) {
+            primitiveClazz = char.class;
+        } else if (wrapperClazz.isAssignableFrom(Short.class)) {
+            primitiveClazz = short.class;
+        } else if (wrapperClazz.isAssignableFrom(Integer.class)) {
+            primitiveClazz = int.class;
+        } else if (wrapperClazz.isAssignableFrom(Long.class)) {
+            primitiveClazz = long.class;
+        } else if (wrapperClazz.isAssignableFrom(Float.class)) {
+            primitiveClazz = float.class;
+        } else if (wrapperClazz.isAssignableFrom(Double.class)) {
+            primitiveClazz = double.class;
         }
 
         return primitiveClazz;
