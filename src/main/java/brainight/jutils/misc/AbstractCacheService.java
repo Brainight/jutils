@@ -1,6 +1,5 @@
 package brainight.jutils.misc;
 
-
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashSet;
@@ -36,6 +35,7 @@ public abstract class AbstractCacheService<K, V> implements ICacheService<K, V> 
     private Consumer<KeyValue<K, V>> onFinish = (kv) -> this.onFinishProcessing(kv);
     private TimeoutExecutor<KeyValue<K, V>> executor = new TimeoutExecutor(onFinish);
     private long timeoutMs = 200L;
+    private long waitingProcessSleep = timeoutMs > 40 ? 20 : 2;
 
     protected AbstractCacheService() {
 
@@ -92,7 +92,7 @@ public abstract class AbstractCacheService<K, V> implements ICacheService<K, V> 
         Future<V> future = executor.submit(() -> {
             while (this.isProcessing(key)) {
                 try {
-                    Thread.sleep(this.timeoutMs >> 1);
+                    Thread.sleep(waitingProcessSleep);
                 } catch (InterruptedException ie) {
                     break;
                 }
