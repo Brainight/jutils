@@ -8,6 +8,7 @@ import brainight.jutils.refl.ReflectionException;
 import brainight.jutils.refl.ReflectionHandler;
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -83,7 +84,7 @@ public class ListArgHandler implements ArgHandler<List> {
 
     private void addPathValues(String[] values, List result) throws ArgsException {
         for (String s : values) {
-            result.add(Path.of(s));
+            result.add(Paths.get(s));
         }
     }
 

@@ -47,6 +47,6 @@ public class PropertyLoader {
     }
 
     public boolean getBooleanProperty(String property) {
-        return this.getProperty(property).equals("true");
+        return this.getProperty(property).toLowerCase().equals("true");
     }
 }
