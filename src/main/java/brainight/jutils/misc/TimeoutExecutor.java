@@ -1,6 +1,5 @@
 package brainight.jutils.misc;
 
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -94,52 +93,4 @@ public class TimeoutExecutor<V> extends ThreadPoolExecutor {
             return null;
         }
     }
-
-    public static <V> Callable<V> getCallable(V id, long wait) {
-        return () -> {
-            try {
-                Thread.sleep(wait);
-            } catch (InterruptedException ie) {
-                ie.printStackTrace();
-            }
-            return id;
-
-        };
-    }
-
-    public static void testCallWithTimeout(TimeoutExecutor to, String id, long wait, long timeout) {
-        try {
-            Object o = to.submit(getCallable(id, wait), timeout);
-            if (o != null) {
-                System.out.println(id);
-            }
-        } catch (ExecutionException | InterruptedException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) throws TimeoutException, InterruptedException, ExecutionException {
-
-        TimeoutExecutor to = new TimeoutExecutor((arg) -> {
-            System.out.println("TIMEDOUT: " + arg.toString());
-        });
-
-        new Thread(() -> {
-            for (int i = 0; i < 200; i++) {
-                long wait = (long) (Math.random() * 1000);
-                System.out.println("Adding task: A" + i);
-                testCallWithTimeout(to, "A" + i, wait, 100);
-            }
-        }).start();
-
-        new Thread(() -> {
-            for (int i = 0; i < 200; i++) {
-                long wait = (long) (Math.random() * 1000);
-                System.out.println("Adding task: B" + i);
-                testCallWithTimeout(to, "B" + i, wait, 100);
-            }
-        }).start();
-
-    }
-
 }

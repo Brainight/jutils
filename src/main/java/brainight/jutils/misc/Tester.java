@@ -1,6 +1,5 @@
 package brainight.jutils.misc;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -12,9 +11,18 @@ import java.util.concurrent.CountDownLatch;
 public class Tester {
 
     public static void main(String[] args) throws InterruptedException {
-        ICacheService<String, String> srv = new DummyCacheService();
+        CountDownLatch cdl = new CountDownLatch(100);
+        ICacheService<String, String> srv = new DummyCacheService() {
+
+            @Override
+            public void onFinishProcessing(KeyValue<String, String> kv) {
+                super.onFinishProcessing(kv);
+                cdl.countDown();
+                System.out.println("Remaining: " + cdl.getCount());
+            }
+        };
         List<String> identifiers = new ArrayList<>();
-        CountDownLatch cdl = new CountDownLatch(400);
+
         for (int i = 0; i < 100; i++) {
             identifiers.add("ID_" + i);
         }
@@ -23,7 +31,6 @@ public class Tester {
             new Thread(() -> {
                 for (String id : identifiers) {
                     String value = srv.get(id);
-                    cdl.countDown();
                     System.out.println(Thread.currentThread().getName() + " - ID: " + id + " - RESULT: " + value);
                 }
             }).start();

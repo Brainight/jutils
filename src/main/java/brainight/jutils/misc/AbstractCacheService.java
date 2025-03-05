@@ -132,17 +132,25 @@ public abstract class AbstractCacheService<K, V> implements ICacheService<K, V> 
         }
     }
 
+    /**
+     * Decides wheter this key should be processed (try resolve it's value) or
+     * if it is already in process of resolving. This avoid two threads trying
+     * to resolve the same key.
+     *
+     * @param key
+     * @return True if key should be resolved, false if not.
+     */
     protected boolean process(K key) {
         this.lock.lock();
         try {
             boolean inprocess = this._processing.contains(key);
-            if (!inprocess) {
-                System.out.println(Thread.currentThread().toString() + " Set processing " + key);
-                this._processing.add(key);
-                inprocess = true;
-                return true;
+            if (inprocess) {
+                return false;
             }
-            return false;
+            System.out.println(Thread.currentThread().toString() + " Set processing " + key);
+            this._processing.add(key);
+            return true;
+
         } finally {
             this.lock.unlock();
         }
